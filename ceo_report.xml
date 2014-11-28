@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<tryton>
+    <data>
+        <record model="ir.action.report" id="ceo_report">
+            <field name="name">CEO Report</field>
+            <field name="model"></field>
+            <field name="report_name">ceo.report</field>
+            <field name="report">ceo_report/ceo_report.html</field>
+        </record>
+        <record model="ir.ui.view" id="ceo_report_view_form">
+            <field name="model">ceo.report.generate.start</field>
+            <field name="type">form</field>
+            <field name="name">ceo_report_form</field>
+        </record>
+        <record model="ir.action.wizard" id="wizard_generate_ceo_report">
+            <field name="name">CEO Report</field>
+            <field name="wiz_name">ceo.report.generate</field>
+        </record>
+        <menuitem parent="ir.menu_administration"
+            action="wizard_generate_ceo_report"
+            id="menu_generate_ceo_report" icon="tryton-spreadsheet"
+            sequence="100"/>
+    </data>
+</tryton>

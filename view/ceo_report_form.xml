@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<form string="CEO Report">
+    <label name="days" />
+    <field name="days" />
+</form>

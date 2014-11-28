@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}CEO Report{% endblock %}</title>
+    <meta name="description" content="">
+    <meta name="author" content="Openlabs Technologies & Consulting (P) Ltd.">
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
+    <link href='http://fonts.googleapis.com/css?family=Lora' rel='stylesheet' type='text/css'>
+    <style type="text/css">
+      .page-break {
+        padding-top: 10px;
+        page-break-before: always;
+      }
+      hr {
+        border-top: 1px solid #000;
+      }
+      .h3 {
+        font-size: 20px;
+      }
+      .h2 {
+        font-size: 16px;
+      }
+      body {
+        font-family: 'Lora', serif;
+        font-size: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    {% block main %}
+        <div class="container-fluid">
+            <div class="row">
+              <div class="col-xs-6">
+                  <div>
+                      {% block header_logo %}
+                      {% endblock %}
+                  </div>
+              </div>
+              <div class="col-xs-6">
+                <div class="row">
+                  <div class="col-xs-12">
+                    <span class="h3">{% block header_title %}CEO Report{% endblock %}</span>
+                  </div>
+                </div>
+                <div class="row" style="padding-top:20px;">
+                    <div class="col-xs-3">
+                      <strong>Date:</strong>
+                    </div>
+                    <div class="col-xs-9 text-capitalize">
+                      {{ datetime.date.today()|dateformat }}
+                    </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                </div>
+                <div class="col-xs-4">
+                    <div class="h2">Number of Orders:</div>
+                    <div class="h2">Number of Shipments:</div>
+                </div>
+                <div class="col-xs-2">
+                    <div class="h2">{{ sales|length() }}</div>
+                    <div class="h2">{{ done_shipments_today }}</div>
+                </div>
+            </div>
+            <div class="row" style="height:800px;">
+                {# Note: Placeholder for pie chart and other front-page content
+                #}
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <span class="h3">Sales</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    {% if sales %}
+                        <table class="table">
+                            <thead>
+                                <th>Order No.</th>
+                                <th>State</th>
+                                <th>Customer Name</th>
+                                <th>Address</th>
+                                <th class="text-right">Amount</th>
+                            </thead>
+                            <tbody>
+                                {% for sale in sales %}
+                                    <tr>
+                                        <td>{{ sale.reference }}</td>
+                                        <td class="text-capitalize">{{ sale.state }}</td>
+                                        <td>{{ sale.party.name }}</td>
+                                        <td>{{ sale.shipment_address.rec_name }}</td>
+                                        <td class="text-right">{{ sale.total_amount|currencyformat(sale.currency.code) }}</td>
+                                    <tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                    <span class="h3">Shipments</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    {% if shipments %}
+                        <table class="table">
+                            <thead>
+                                <th>Code</th>
+                                <th>State</th>
+                                <th>Customer Name</th>
+                                <th class="text-center">Carrier</th>
+                                <th class="text-center">Carrier Method</th>
+                            </thead>
+                            <tbody>
+                                {% for shipment in shipments %}
+                                    <tr>
+                                        <td>{{ shipment.code }}</td>
+                                        <td class="text-capitalize">{{ shipment.state }}</td>
+                                        <td>{{ shipment.customer.name }}</td>
+                                        <td class="text-center">{{ shipment.carrier and shipment.carrier.party.name or '-' }}</td>
+                                        <td class="text-center">{{ shipment.carrier and shipment.carrier.carrier_cost_method or '-' }}</td>
+                                    <tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                    <span class="h3">Inventories</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    {% if inventories %}
+                        <table class="table">
+                            <thead>
+                                <th>Location</th>
+                                <th>Product</th>
+                                <th class="text-right">Expected Quantity</th>
+                                <th class="text-right">Quantity</th>
+                            </thead>
+                            <tbody>
+                                {% for inventory in inventories %}
+                                    <tr>
+                                        <td>{{ inventory.location.rec_name }}</td>
+                                        <td colspan="3">Reason: {{ inventory.reason }}</td>
+                                    </tr>
+                                    {% for line in inventory.lines %}
+                                        <tr>
+                                            <td></td>
+                                            <td>{{ line.product.code }} - {{ line.product.name }}</td>
+                                            <td class="text-right">{{ formatLang(line.expected_quantity, inventory.company.party.lang, digits=line.unit_digits) }} {% if line.uom.symbol != 'u' %}{{ line.uom.symbol }}{% endif %}</td>
+                                            <td class="text-right">{{ formatLang(line.quantity, inventory.company.party.lang, digits=line.unit_digits) }} {% if line.uom.symbol != 'u' %}{{ line.uom.symbol }}{% endif %}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                    <span class="h3">Productions</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    {% if productions %}
+                        <table class="table">
+                            <thead>
+                                <th>Ref.</th>
+                                <th>State</th>
+                                <th>Planned Date</th>
+                                <th class="text-center">Warehouse</th>
+                                <th>Product</th>
+                                <th class="text-right">Quantity</th>
+                                <th class="text-right">Cost</th>
+                            </thead>
+                            <tbody>
+                                {% for production in productions %}
+                                    <tr>
+                                        <td>{{ production.reference or '-' }}</td>
+                                        <td class="text-capitalize">{{ production.state }}</td>
+                                        <td>{{ production.planned_date|dateformat }}</td>
+                                        <td class="text-center">{{ production.warehouse and production.warehouse.rec_name or '-' }}</td>
+                                        <td>{{ production.product.code }} - {{ production.product.name }}</td>
+                                        <td class="text-right">
+                                          {% if production.quantity %}
+                                            {{ formatLang(production.quantity, production.company.party.lang, digits=production.unit_digits) }} {% if production.uom.symbol != 'u' %}{{ production.uom.symbol }}{% endif %}
+                                          {% else %}
+                                            -
+                                          {% endif %}
+                                        </td>
+                                        <td class="text-right">{{ production.cost|currencyformat(production.company.currency.code) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+  </body>
+</html>
