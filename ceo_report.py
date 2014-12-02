@@ -5,7 +5,7 @@
     :copyright: (c) 2014 by Openlabs Technologies & Consulting (P) Limited
     :license: BSD, see LICENSE for more details.
 """
-from datetime import date, datetime
+from datetime import datetime, time, date
 from dateutil.relativedelta import relativedelta
 from openlabs_report_webkit import ReportWebkit
 
@@ -52,29 +52,28 @@ class CEOReport(ReportWebkit):
         Inventory = Pool().get('stock.inventory')
         Production = Pool().get('production')
 
-        days = 1
-
-        # Can be used for generating report for multiple days
-        if data.get('days'):
-            days = data['days']
-
         sales = Sale.search([
             ('state', 'in', ['confirmed', 'processing', 'done']),
-            ('write_date', '>=', (datetime.today() - relativedelta(days=days))),
+            ('sale_date', '>=', data['start_date'].date()),
+            ('sale_date', '<=', data['end_date'].date()),
         ])
         shipments = ShipmentOut.search([
             ('state', 'in', ['done', 'packed', 'assigned', 'waiting']),
-            ('write_date', '>=', (datetime.today() - relativedelta(days=days))),
+            ('write_date', '>=', data['start_date']),
+            ('write_date', '<=', data['end_date']),
         ])
         productions = Production.search([
             ('state', 'in', ['done', 'running', 'assigned', 'waiting']),
-            ('write_date', '>=', (datetime.today() - relativedelta(days=days))),
+            ('write_date', '>=', data['start_date']),
+            ('write_date', '<=', data['end_date']),
         ])
         inventories = Inventory.search([
-            ('date', '>=', (date.today() - relativedelta(days=days))),
+            ('date', '>=', data['start_date'].date()),
+            ('date', '<=', data['end_date'].date()),
         ])
         done_shipments_today = ShipmentOut.search([
-            ('effective_date', '>=', (date.today() - relativedelta(days=days))),
+            ('effective_date', '>=', data.get('start_date').date()),
+            ('effective_date', '<=', data.get('end_date').date()),
             ('state', '=', 'done'),
         ], count=True)
 
@@ -94,7 +93,22 @@ class GenerateCEOReportStart(ModelView):
     'Generate CEO Report'
     __name__ = 'ceo.report.generate.start'
 
-    days = fields.Integer('No. of Days')
+    start_date = fields.DateTime('Start Date', required=True)
+    end_date = fields.DateTime('End Date', required=True)
+
+    @staticmethod
+    def default_start_date():
+        return datetime.combine(
+            date.today() - relativedelta(days=1),
+            time.min
+        )
+
+    @staticmethod
+    def default_end_date():
+        return datetime.combine(
+            date.today() - relativedelta(days=1),
+            time.max
+        )
 
 
 class GenerateCEOReport(Wizard):
@@ -115,7 +129,8 @@ class GenerateCEOReport(Wizard):
         Sends the selected shop and customer as report data
         """
         data = {
-            'days': self.start.days or 1,
+            'start_date': self.start.start_date,
+            'end_date': self.start.end_date,
         }
         return action, data
 

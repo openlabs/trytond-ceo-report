@@ -51,7 +51,7 @@
                       <strong>Date:</strong>
                     </div>
                     <div class="col-xs-9 text-capitalize">
-                      {{ datetime.date.today()|dateformat }}
+                      {{ data['start_date'].date()|dateformat }} - {{ data['end_date'].date()|dateformat }}
                     </div>
                 </div>
               </div>
