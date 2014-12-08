@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
     <link href='http://fonts.googleapis.com/css?family=Lora' rel='stylesheet' type='text/css'>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.8/c3.css' rel='stylesheet' type='text/css'>
     <style type="text/css">
       .page-break {
         padding-top: 10px;
@@ -55,55 +56,46 @@
                     </div>
                 </div>
               </div>
+              <div class="col-xs-12">
+                <hr />
+              </div>
             </div>
             <div class="row">
-                <div class="col-xs-12">
-                    <hr />
-                </div>
                 <div class="col-xs-4">
                     <div class="h2">Number of Orders:</div>
                     <div class="h2">Number of Shipments:</div>
                 </div>
-                <div class="col-xs-2">
+                <div class="col-xs-8">
                     <div class="h2">{{ sales|length() }}</div>
                     <div class="h2">{{ done_shipments_today }}</div>
                 </div>
             </div>
-            <div class="row" style="height:800px;">
-                {# Note: Placeholder for pie chart and other front-page content
+            {% if sales and (sale_has_salesman or sale_has_shop) %}
+              <div class="row" style="padding-top:15px; padding-bottom:15px;">
+                {% if sale_has_salesman %}
+                  <div class="col-xs-12" style="padding-top:20px;">
+                      <p class="h2 text-center">Sales by Salesman</p>
+                  </div>
+                  <div class="col-xs-9 col-xs-offset-3">
+                    <div id="sales_by_salesman_piechart"></div>
+                  </div>
+                {% endif %}
+                {% if sale_has_shop %}
+                  <div class="col-xs-12" style="padding-top:20px;">
+                      <p class="h2 text-center">Sales by Shop</p>
+                  </div>
+                  <div class="col-xs-9 col-xs-offset-3">
+                    <div id="sales_by_shop_piechart"></div>
+                  </div>
+                {% endif %}
+              </div>
+            {% else %}
+              <div class="row" style="height:810px;">
+                {# Note: An empty div to cover up page space if there are
+                  no charts to be drawn
                 #}
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <span class="h3">Sales</span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    {% if sales %}
-                        <table class="table">
-                            <thead>
-                                <th>Order No.</th>
-                                <th>State</th>
-                                <th>Customer Name</th>
-                                <th>Address</th>
-                                <th class="text-right">Amount</th>
-                            </thead>
-                            <tbody>
-                                {% for sale in sales %}
-                                    <tr>
-                                        <td>{{ sale.reference }}</td>
-                                        <td class="text-capitalize">{{ sale.state }}</td>
-                                        <td>{{ sale.party.name }}</td>
-                                        <td>{{ sale.shipment_address.rec_name }}</td>
-                                        <td class="text-right">{{ sale.total_amount|currencyformat(sale.currency.code) }}</td>
-                                    <tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% endif %}
-                </div>
-            </div>
+              </div>
+            {% endif %}
             <div class="row">
                 <div class="col-xs-12">
                     <hr />
@@ -216,5 +208,53 @@
             </div>
         </div>
     {% endblock %}
+
+    <script type="text/javascript">
+      // Referred from "https://github.com/masayuki0812/c3/issues/552" to fix
+      // error in c3 where charts were not visible after conversion to PDF
+      Function.prototype.bind = Function.prototype.bind || function (thisp) {
+        var fn = this;
+        return function () {
+          return fn.apply(thisp, arguments);
+        };
+      };
+    </script>
+
+    {% block script_tags %}
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.8/c3.js"></script>
+    {% endblock script_tags %}
+
+    {% block scripts %}
+      {% if sales and (sale_has_salesman or sale_has_shop) %}
+        <script type="text/javascript">
+          function drawPieChart(element_id, data) {
+            var chart = c3.generate({
+              bindto: element_id,
+              size: {
+                width: 320,
+                height: 320
+              },
+              data: {
+                columns: data,
+                type: 'pie',
+              },
+              transition: {
+                duration: 10
+              },
+              padding: {
+                top: 20
+              }
+            });
+          }
+          {% if sale_has_salesman %}
+            drawPieChart("#sales_by_salesman_piechart", {{ get_sales_by_salesman_data(sales) }});
+          {% endif %}
+          {% if sale_has_salesman %}
+            drawPieChart("#sales_by_shop_piechart", {{ get_sales_by_shop_data(sales) }});
+          {% endif %}
+        </script>
+      {% endif %}
+    {% endblock scripts %}
   </body>
 </html>
