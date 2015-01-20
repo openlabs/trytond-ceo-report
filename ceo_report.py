@@ -108,7 +108,7 @@ class CEOReport(ReportWebkit):
             key=lambda s: s.employee
         ):
             sales_by_salesman.append([
-                salesman and salesman.party.name or "Others",
+                salesman and salesman.party.name or "(not set)",
                 len(list(records))
             ])
 
