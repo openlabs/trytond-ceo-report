@@ -99,38 +99,6 @@
             <div class="row">
                 <div class="col-xs-12">
                     <hr />
-                    <span class="h3">Shipments</span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    {% if shipments %}
-                        <table class="table">
-                            <thead>
-                                <th>Code</th>
-                                <th>State</th>
-                                <th>Customer Name</th>
-                                <th class="text-center">Carrier</th>
-                                <th class="text-center">Carrier Method</th>
-                            </thead>
-                            <tbody>
-                                {% for shipment in shipments %}
-                                    <tr>
-                                        <td>{{ shipment.code }}</td>
-                                        <td class="text-capitalize">{{ shipment.state }}</td>
-                                        <td>{{ shipment.customer.name }}</td>
-                                        <td class="text-center">{{ shipment.carrier and shipment.carrier.party.name or '-' }}</td>
-                                        <td class="text-center">{{ shipment.carrier and shipment.carrier.carrier_cost_method or '-' }}</td>
-                                    <tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <hr />
                     <span class="h3">Inventories</span>
                 </div>
             </div>
