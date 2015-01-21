@@ -99,7 +99,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <hr />
-                    <span class="h3">Inventories</span>
+                    <span class="h3">Inventory Adjustments</span>
                 </div>
             </div>
             <div class="row">
@@ -119,7 +119,13 @@
                                         <td colspan="3">Reason: {{ inventory.reason }}</td>
                                     </tr>
                                     {% for line in inventory.lines %}
-                                        <tr>
+                                        <tr class="
+                                          {% if line.quantity < line.expected_quantity %}
+                                              danger
+                                          {% else %}
+                                              success
+                                          {% endif %}
+                                        ">
                                             <td></td>
                                             <td>{{ line.product.code }} - {{ line.product.name }}</td>
                                             <td class="text-right">{{ formatLang(line.expected_quantity, inventory.company.party.lang, digits=line.unit_digits) }} {% if line.uom.symbol != 'u' %}{{ line.uom.symbol }}{% endif %}</td>
