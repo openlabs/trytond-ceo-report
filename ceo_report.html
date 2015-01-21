@@ -99,39 +99,7 @@
             <div class="row">
                 <div class="col-xs-12">
                     <hr />
-                    <span class="h3">Shipments</span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    {% if shipments %}
-                        <table class="table">
-                            <thead>
-                                <th>Code</th>
-                                <th>State</th>
-                                <th>Customer Name</th>
-                                <th class="text-center">Carrier</th>
-                                <th class="text-center">Carrier Method</th>
-                            </thead>
-                            <tbody>
-                                {% for shipment in shipments %}
-                                    <tr>
-                                        <td>{{ shipment.code }}</td>
-                                        <td class="text-capitalize">{{ shipment.state }}</td>
-                                        <td>{{ shipment.customer.name }}</td>
-                                        <td class="text-center">{{ shipment.carrier and shipment.carrier.party.name or '-' }}</td>
-                                        <td class="text-center">{{ shipment.carrier and shipment.carrier.carrier_cost_method or '-' }}</td>
-                                    <tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <hr />
-                    <span class="h3">Inventories</span>
+                    <span class="h3">Inventory Adjustments</span>
                 </div>
             </div>
             <div class="row">
@@ -151,7 +119,13 @@
                                         <td colspan="3">Reason: {{ inventory.reason }}</td>
                                     </tr>
                                     {% for line in inventory.lines %}
-                                        <tr>
+                                        <tr class="
+                                          {% if line.quantity < line.expected_quantity %}
+                                              danger
+                                          {% else %}
+                                              success
+                                          {% endif %}
+                                        ">
                                             <td></td>
                                             <td>{{ line.product.code }} - {{ line.product.name }}</td>
                                             <td class="text-right">{{ formatLang(line.expected_quantity, inventory.company.party.lang, digits=line.unit_digits) }} {% if line.uom.symbol != 'u' %}{{ line.uom.symbol }}{% endif %}</td>
