@@ -6,30 +6,37 @@
     <meta name="description" content="">
     <meta name="author" content="Openlabs Technologies & Consulting (P) Ltd.">
 
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
-    <link href='http://fonts.googleapis.com/css?family=Lora' rel='stylesheet' type='text/css'>
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.8/c3.css' rel='stylesheet' type='text/css'>
-    <style type="text/css">
-      .page-break {
-        padding-top: 10px;
-        page-break-before: always;
-      }
-      hr {
-        border-top: 1px solid #000;
-      }
-      .h3 {
-        font-size: 20px;
-      }
-      .h2 {
-        font-size: 16px;
-      }
-      body {
-        font-family: 'Lora', serif;
-        font-size: 10px;
-      }
-    </style>
+    {% block links %}
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+      <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+      <link href='http://fonts.googleapis.com/css?family=Lora' rel='stylesheet' type='text/css'>
+      <link href='https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.8/c3.css' rel='stylesheet' type='text/css'>
+    {% endblock %}
+    {% block style %}
+      <style type="text/css">
+        .page-break {
+          padding-top: 10px;
+          page-break-before: always;
+        }
+        hr {
+          border-top: 1px solid #000;
+        }
+        .h3 {
+          font-size: 20px;
+        }
+        .h2 {
+          font-size: 16px;
+        }
+        body {
+          font-family: 'Lora', serif;
+          font-size: 10px;
+        }
+        tbody tr {
+          page-break-inside: avoid;
+        }
+      </style>
+    {% endblock %}
   </head>
   <body>
     {% block main %}
