@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}CEO Report{% endblock %}</title>
+    <meta name="description" content="">
+    <meta name="author" content="Openlabs Technologies & Consulting (P) Ltd.">
+
+    {% block links %}
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+      <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+      <link href='http://fonts.googleapis.com/css?family=Lora' rel='stylesheet' type='text/css'>
+      <link href='https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.8/c3.css' rel='stylesheet' type='text/css'>
+    {% endblock %}
+    {% block style %}
+      <style type="text/css">
+        .page-break {
+          padding-top: 10px;
+          page-break-before: always;
+        }
+        hr {
+          border-top: 1px solid #000;
+        }
+        .h3 {
+          font-size: 20px;
+        }
+        .h2 {
+          font-size: 16px;
+        }
+        body {
+          font-family: 'Lora', serif;
+          font-size: 10px;
+        }
+        tbody tr {
+          page-break-inside: avoid;
+        }
+      </style>
+    {% endblock %}
+  </head>
+  <body>
+    {% block main %}
+        <div class="container-fluid">
+            <div class="row">
+              <div class="col-xs-6">
+                  <div>
+                      {% block header_logo %}
+                      {% endblock %}
+                  </div>
+              </div>
+              <div class="col-xs-6">
+                <div class="row">
+                  <div class="col-xs-12">
+                    <span class="h3">{% block header_title %}CEO Report{% endblock %}</span>
+                  </div>
+                </div>
+                <div class="row" style="padding-top:20px;">
+                    <div class="col-xs-3">
+                      <strong>Date:</strong>
+                    </div>
+                    <div class="col-xs-9 text-capitalize">
+                      {{ data['start_date'].date()|dateformat }} - {{ data['end_date'].date()|dateformat }}
+                    </div>
+                </div>
+              </div>
+              <div class="col-xs-12">
+                <hr />
+              </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-4">
+                    <div class="h2">Number of Orders:</div>
+                    <div class="h2">Number of Shipments:</div>
+                </div>
+                <div class="col-xs-8">
+                    <div class="h2">{{ sales|length() }}</div>
+                    <div class="h2">{{ done_shipments_today }}</div>
+                </div>
+            </div>
+            {% if sales and (sale_has_salesman or sale_has_shop) %}
+              <div class="row" style="padding-top:15px; padding-bottom:15px;">
+                {% if sale_has_salesman %}
+                  <div class="col-xs-12" style="padding-top:20px;">
+                      <p class="h2 text-center">Sales by Salesman</p>
+                  </div>
+                  <div class="col-xs-9 col-xs-offset-3">
+                    <div id="sales_by_salesman_piechart"></div>
+                  </div>
+                {% endif %}
+                {% if sale_has_shop %}
+                  <div class="col-xs-12" style="padding-top:20px;">
+                      <p class="h2 text-center">Sales by Shop</p>
+                  </div>
+                  <div class="col-xs-9 col-xs-offset-3">
+                    <div id="sales_by_shop_piechart"></div>
+                  </div>
+                {% endif %}
+              </div>
+            {% else %}
+              <div class="row" style="height:810px;">
+                {# Note: An empty div to cover up page space if there are
+                  no charts to be drawn
+                #}
+              </div>
+            {% endif %}
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                    <span class="h3">Inventory Adjustments</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    {% if inventories %}
+                        <table class="table">
+                            <thead>
+                                <th>Location</th>
+                                <th>Product</th>
+                                <th class="text-right">Expected Quantity</th>
+                                <th class="text-right">Quantity</th>
+                            </thead>
+                            <tbody>
+                                {% for inventory in inventories %}
+                                    <tr>
+                                        <td>{{ inventory.location.rec_name }}</td>
+                                        <td colspan="3">Reason: {{ inventory.reason }}</td>
+                                    </tr>
+                                    {% for line in inventory.lines %}
+                                        <tr class="
+                                          {% if line.quantity < line.expected_quantity %}
+                                              danger
+                                          {% else %}
+                                              success
+                                          {% endif %}
+                                        ">
+                                            <td></td>
+                                            <td>{{ line.product.code }} - {{ line.product.name }}</td>
+                                            <td class="text-right">{{ formatLang(line.expected_quantity, inventory.company.party.lang, digits=line.unit_digits) }} {% if line.uom.symbol != 'u' %}{{ line.uom.symbol }}{% endif %}</td>
+                                            <td class="text-right">{{ formatLang(line.quantity, inventory.company.party.lang, digits=line.unit_digits) }} {% if line.uom.symbol != 'u' %}{{ line.uom.symbol }}{% endif %}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <hr />
+                    <span class="h3">Productions</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    {% if productions %}
+                        <table class="table">
+                            <thead>
+                                <th>Ref.</th>
+                                <th>State</th>
+                                <th>Planned Date</th>
+                                <th class="text-center">Warehouse</th>
+                                <th>Product</th>
+                                <th class="text-right">Quantity</th>
+                                <th class="text-right">Cost</th>
+                            </thead>
+                            <tbody>
+                                {% for production in productions %}
+                                    <tr>
+                                        <td>{{ production.reference or '-' }}</td>
+                                        <td class="text-capitalize">{{ production.state }}</td>
+                                        <td>{{ production.planned_date|dateformat }}</td>
+                                        <td class="text-center">{{ production.warehouse and production.warehouse.rec_name or '-' }}</td>
+                                        <td>{{ production.product.code }} - {{ production.product.name }}</td>
+                                        <td class="text-right">
+                                          {% if production.quantity %}
+                                            {{ formatLang(production.quantity, production.company.party.lang, digits=production.unit_digits) }} {% if production.uom.symbol != 'u' %}{{ production.uom.symbol }}{% endif %}
+                                          {% else %}
+                                            -
+                                          {% endif %}
+                                        </td>
+                                        <td class="text-right">{{ production.cost|currencyformat(production.company.currency.code) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+
+    <script type="text/javascript">
+      // Referred from "https://github.com/masayuki0812/c3/issues/552" to fix
+      // error in c3 where charts were not visible after conversion to PDF
+      Function.prototype.bind = Function.prototype.bind || function (thisp) {
+        var fn = this;
+        return function () {
+          return fn.apply(thisp, arguments);
+        };
+      };
+    </script>
+
+    {% block script_tags %}
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.8/c3.js"></script>
+    {% endblock script_tags %}
+
+    {% block scripts %}
+      {% if sales and (sale_has_salesman or sale_has_shop) %}
+        <script type="text/javascript">
+          function drawPieChart(element_id, data) {
+            var chart = c3.generate({
+              bindto: element_id,
+              size: {
+                width: 320,
+                height: 320
+              },
+              data: {
+                columns: data,
+                type: 'pie',
+              },
+              transition: {
+                duration: 10
+              },
+              padding: {
+                top: 20
+              }
+            });
+          }
+          {% if sale_has_salesman %}
+            drawPieChart("#sales_by_salesman_piechart", {{ get_sales_by_salesman_data(sales) }});
+          {% endif %}
+          {% if sale_has_salesman %}
+            drawPieChart("#sales_by_shop_piechart", {{ get_sales_by_shop_data(sales) }});
+          {% endif %}
+        </script>
+      {% endif %}
+    {% endblock scripts %}
+  </body>
+</html>
