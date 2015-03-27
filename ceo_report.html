@@ -77,7 +77,7 @@
                     <div class="h2">{{ done_shipments_today }}</div>
                 </div>
             </div>
-            {% if sales and (sale_has_salesman or sale_has_shop) %}
+            {% if sales and (sale_has_salesman or sale_has_channel) %}
               <div class="row" style="padding-top:15px; padding-bottom:15px;">
                 {% if sale_has_salesman %}
                   <div class="col-xs-12" style="padding-top:20px;">
@@ -87,12 +87,12 @@
                     <div id="sales_by_salesman_piechart"></div>
                   </div>
                 {% endif %}
-                {% if sale_has_shop %}
+                {% if sale_has_channel %}
                   <div class="col-xs-12" style="padding-top:20px;">
-                      <p class="h2 text-center">Sales by Shop</p>
+                      <p class="h2 text-center">Sales by Channel</p>
                   </div>
                   <div class="col-xs-9 col-xs-offset-3">
-                    <div id="sales_by_shop_piechart"></div>
+                    <div id="sales_by_channel_piechart"></div>
                   </div>
                 {% endif %}
               </div>
@@ -207,7 +207,7 @@
     {% endblock script_tags %}
 
     {% block scripts %}
-      {% if sales and (sale_has_salesman or sale_has_shop) %}
+      {% if sales and (sale_has_salesman or sale_has_channel) %}
         <script type="text/javascript">
           function drawPieChart(element_id, data) {
             var chart = c3.generate({
@@ -231,8 +231,8 @@
           {% if sale_has_salesman %}
             drawPieChart("#sales_by_salesman_piechart", {{ get_sales_by_salesman_data(sales) }});
           {% endif %}
-          {% if sale_has_salesman %}
-            drawPieChart("#sales_by_shop_piechart", {{ get_sales_by_shop_data(sales) }});
+          {% if sale_has_channel %}
+            drawPieChart("#sales_by_channel_piechart", {{ get_sales_by_channel_data(sales) }});
           {% endif %}
         </script>
       {% endif %}

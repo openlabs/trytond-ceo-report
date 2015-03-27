@@ -87,9 +87,9 @@ class CEOReport(ReportWebkit):
             'inventories': inventories,
             'done_shipments_today': done_shipments_today,
             'sale_has_salesman': hasattr(Sale, 'employee'),
-            'sale_has_shop': hasattr(Sale, 'shop'),
+            'sale_has_channel': hasattr(Sale, 'channel'),
             'get_sales_by_salesman_data': cls.get_sales_by_salesman_data,
-            'get_sales_by_shop_data': cls.get_sales_by_shop_data
+            'get_sales_by_channel_data': cls.get_sales_by_channel_data
         })
         return super(CEOReport, cls).parse(
             report, records, data, localcontext
@@ -115,23 +115,23 @@ class CEOReport(ReportWebkit):
         return json.dumps(sales_by_salesman)
 
     @classmethod
-    def get_sales_by_shop_data(cls, sales):
+    def get_sales_by_channel_data(cls, sales):
         """
         Extracts the data from sales and returns it in the form
         understandable for the graph
         """
-        sales_by_shop = []
+        sales_by_channel = []
 
-        for shop, records in groupby(
-            sorted(sales, key=lambda s: s.shop),
-            key=lambda s: s.shop
+        for channel, records in groupby(
+            sorted(sales, key=lambda s: s.channel),
+            key=lambda s: s.channel
         ):
-            sales_by_shop.append([
-                shop and shop.name or "Others",
+            sales_by_channel.append([
+                channel and channel.name or "Others",
                 len(list(records))
             ])
 
-        return json.dumps(sales_by_shop)
+        return json.dumps(sales_by_channel)
 
 
 class GenerateCEOReportStart(ModelView):
@@ -171,7 +171,7 @@ class GenerateCEOReport(Wizard):
 
     def do_generate(self, action):
         """
-        Sends the selected shop and customer as report data
+        Sends the date range as report data
         """
         data = {
             'start_date': self.start.start_date,
